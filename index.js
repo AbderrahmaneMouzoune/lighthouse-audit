@@ -2,6 +2,7 @@ import lighthouse from "lighthouse"
 import { URL } from "url"
 import puppeteer from "puppeteer"
 import ExcelJS from "exceljs"
+import path from "path"
 
 const sitesToAudit = [
   {
@@ -51,6 +52,9 @@ async function runLighthouse(url, isMobile) {
 }
 
 async function createExcelFile(results) {
+  const auditResultsFolder = "audit_results"
+  const excelFilePath = path.join(auditResultsFolder, "lighthouse_results.xlsx")
+
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet("Lighthouse Audit Results")
 
@@ -86,8 +90,15 @@ async function createExcelFile(results) {
     ])
   })
 
+  // Créer le dossier s'il n'existe pas
+  if (!fs.existsSync(auditResultsFolder)) {
+    fs.mkdirSync(auditResultsFolder)
+  }
+
   // Sauvegarder le fichier Excel
-  await workbook.xlsx.writeFile("audit_result/lighthouse_results.xlsx")
+  await workbook.xlsx.writeFile(excelFilePath)
+
+  console.log(`Excel file created: ${excelFilePath}`)
 }
 
 async function main() {
@@ -140,8 +151,6 @@ async function main() {
 
   // Créer le fichier Excel avec les résultats d'audit
   await createExcelFile(auditResults)
-
-  console.log("Excel file created: lighthouse_results.xlsx")
 }
 
 main()
