@@ -3,7 +3,24 @@ import { URL } from "url"
 import puppeteer from "puppeteer"
 import ExcelJS from "exceljs"
 
-const urlsToAudit = ["https://abderrahmanemouzoune.com"]
+const sitesToAudit = [
+  {
+    name: "Mon portfolio",
+    urls: [
+      "https://abderrahmanemouzoune.com",
+      "https://abderrahmanemouzoune.com/portfolio",
+      // Ajoutez toutes les URL de landing pour le site 1
+    ],
+  },
+  {
+    name: "Portfolio d'Ahmed",
+    urls: [
+      "https://ahmedmouzoune.com",
+      // Ajoutez toutes les URL de landing pour le site 1
+    ],
+  },
+  // Ajoutez d'autres sites au besoin
+]
 
 async function runLighthouse(url) {
   const browser = await puppeteer.launch()
@@ -27,6 +44,7 @@ async function createExcelFile(results) {
 
   // Ajouter une ligne d'en-tête
   worksheet.addRow([
+    "Site",
     "URL",
     "Performance",
     "Accessibility",
@@ -34,11 +52,12 @@ async function createExcelFile(results) {
     "SEO",
   ])
 
-  // Ajouter les résultats pour chaque URL
+  // Ajouter les résultats pour chaque site et URL
   results.forEach((result) => {
-    const { url, categories } = result
+    const { siteName, url, categories } = result
 
     worksheet.addRow([
+      siteName,
       url,
       categories.performance.score * 100,
       categories.accessibility.score * 100,
@@ -54,15 +73,19 @@ async function createExcelFile(results) {
 async function main() {
   const auditResults = []
 
-  for (const url of urlsToAudit) {
-    try {
-      const report = await runLighthouse(url)
-      const result = JSON.parse(report)
-      auditResults.push({ url, categories: result.categories })
-      console.log(`Audit for ${url}:`)
-      console.log(report)
-    } catch (error) {
-      console.error(`Error auditing ${url}: ${error.message}`)
+  for (const site of sitesToAudit) {
+    const { name: siteName, urls } = site
+
+    for (const url of urls) {
+      try {
+        const report = await runLighthouse(url)
+        const result = JSON.parse(report)
+        auditResults.push({ siteName, url, categories: result.categories })
+        console.log(`Audit for ${siteName} - ${url}:`)
+        console.log(report)
+      } catch (error) {
+        console.error(`Error auditing ${siteName} - ${url}: ${error.message}`)
+      }
     }
   }
 
