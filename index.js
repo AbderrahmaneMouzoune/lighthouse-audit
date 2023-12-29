@@ -22,9 +22,21 @@ const sitesToAudit = [
   // Ajoutez d'autres sites au besoin
 ]
 
-async function runLighthouse(url) {
+async function runLighthouse(url, isMobile) {
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
+
+  // Définir l'émulation mobile si isMobile est true
+  if (isMobile) {
+    await page.setViewport({
+      width: 375,
+      height: 667,
+      isMobile: true,
+      hasTouch: true,
+      deviceScaleFactor: 2,
+    })
+  }
+
   await page.goto(url, { waitUntil: "domcontentloaded" })
 
   const lighthouseResult = await lighthouse(
@@ -46,10 +58,14 @@ async function createExcelFile(results) {
   worksheet.addRow([
     "Site",
     "URL",
-    "Performance",
-    "Accessibility",
-    "Best Practices",
-    "SEO",
+    "Mobile Performance",
+    "Desktop Performance",
+    "Mobile Accessibility",
+    "Desktop Accessibility",
+    "Mobile Best Practices",
+    "Desktop Best Practices",
+    "Mobile SEO",
+    "Desktop SEO",
   ])
 
   // Ajouter les résultats pour chaque site et URL
@@ -59,10 +75,14 @@ async function createExcelFile(results) {
     worksheet.addRow([
       siteName,
       url,
-      categories.performance.score * 100,
-      categories.accessibility.score * 100,
-      categories["best-practices"].score * 100,
-      categories.seo.score * 100,
+      categories.performance.mobile * 100,
+      categories.performance.desktop * 100,
+      categories.accessibility.mobile * 100,
+      categories.accessibility.desktop * 100,
+      categories["best-practices"].mobile * 100,
+      categories["best-practices"].desktop * 100,
+      categories.seo.mobile * 100,
+      categories.seo.desktop * 100,
     ])
   })
 
@@ -78,11 +98,40 @@ async function main() {
 
     for (const url of urls) {
       try {
-        const report = await runLighthouse(url)
-        const result = JSON.parse(report)
-        auditResults.push({ siteName, url, categories: result.categories })
+        // Audit pour la version mobile
+        const mobileReport = await runLighthouse(url, true)
+        const mobileResult = JSON.parse(mobileReport)
+
+        // Audit pour la version desktop
+        const desktopReport = await runLighthouse(url, false)
+        const desktopResult = JSON.parse(desktopReport)
+
+        auditResults.push({
+          siteName,
+          url,
+          categories: {
+            performance: {
+              mobile: mobileResult.categories.performance.score,
+              desktop: desktopResult.categories.performance.score,
+            },
+            accessibility: {
+              mobile: mobileResult.categories.accessibility.score,
+              desktop: desktopResult.categories.accessibility.score,
+            },
+            "best-practices": {
+              mobile: mobileResult.categories["best-practices"].score,
+              desktop: desktopResult.categories["best-practices"].score,
+            },
+            seo: {
+              mobile: mobileResult.categories.seo.score,
+              desktop: desktopResult.categories.seo.score,
+            },
+          },
+        })
+
         console.log(`Audit for ${siteName} - ${url}:`)
-        console.log(report)
+        console.log(`Mobile Report: ${mobileReport}`)
+        console.log(`Desktop Report: ${desktopReport}`)
       } catch (error) {
         console.error(`Error auditing ${siteName} - ${url}: ${error.message}`)
       }
@@ -92,7 +141,7 @@ async function main() {
   // Créer le fichier Excel avec les résultats d'audit
   await createExcelFile(auditResults)
 
-  console.log("Excel file created: audit_result/lighthouse_results.xlsx")
+  console.log("Excel file created: lighthouse_results.xlsx")
 }
 
 main()
