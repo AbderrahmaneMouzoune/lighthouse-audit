@@ -3,6 +3,7 @@ import { URL } from "url"
 import puppeteer from "puppeteer"
 import ExcelJS from "exceljs"
 import path from "path"
+import fs from "fs"
 
 const sitesToAudit = [
   {
