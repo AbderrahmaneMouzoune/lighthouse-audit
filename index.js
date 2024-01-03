@@ -34,19 +34,19 @@ const carrefourSitesToAudit = [
           "https://voyages.carrefour.fr/serp?s_c.site=B2C&s_c.type_produit=sejour_etranger,sejour_france,circuits&s_c.destination=MCPI.ES",
         nameOfPage: "SERP",
       },
-      {
-        linkGoTo:
-          "https://voyages.carrefour.fr/sejour-etranger/djerba/hotel-vincci-safira-palms?pageType=product&s_pid=270110",
-        nameOfPage: "FICHE PRODUIT",
-      },
-      {
-        linkGoTo: "https://voyages.carrefour.fr/accueil/sejour-france",
-        nameOfPage: "LANDING FR",
-      },
-      {
-        linkGoTo: "https://voyages.carrefour.fr/accueil/derniere-minute/sejour",
-        nameOfPage: "LANDING DM",
-      },
+      // {
+      //   linkGoTo:
+      //     "https://voyages.carrefour.fr/sejour-etranger/djerba/hotel-vincci-safira-palms?pageType=product&s_pid=270110",
+      //   nameOfPage: "FICHE PRODUIT",
+      // },
+      // {
+      //   linkGoTo: "https://voyages.carrefour.fr/accueil/sejour-france",
+      //   nameOfPage: "LANDING FR",
+      // },
+      // {
+      //   linkGoTo: "https://voyages.carrefour.fr/accueil/derniere-minute/sejour",
+      //   nameOfPage: "LANDING DM",
+      // },
     ],
   },
   // {
@@ -147,10 +147,8 @@ async function createExcelFile(results) {
     "Desktop Performance",
     "Mobile Accessibility",
     "Desktop Accessibility",
-    "Mobile Best Practices",
-    "Desktop Best Practices",
-    "Mobile SEO",
-    "Desktop SEO",
+    "Best Practices",
+    "SEO",
   ]);
 
   // Ajouter les résultats pour chaque site et URL
@@ -166,9 +164,7 @@ async function createExcelFile(results) {
       categories.accessibility.mobile * 100,
       categories.accessibility.desktop * 100,
       categories["best-practices"].mobile * 100,
-      categories["best-practices"].desktop * 100,
       categories.seo.mobile * 100,
-      categories.seo.desktop * 100,
     ]);
   });
 
@@ -214,11 +210,9 @@ async function main() {
             },
             "best-practices": {
               mobile: mobileResult.categories["best-practices"].score,
-              desktop: desktopResult.categories["best-practices"].score,
             },
             seo: {
               mobile: mobileResult.categories.seo.score,
-              desktop: desktopResult.categories.seo.score,
             },
           },
         });
