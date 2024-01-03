@@ -34,19 +34,19 @@ const carrefourSitesToAudit = [
           "https://voyages.carrefour.fr/serp?s_c.site=B2C&s_c.type_produit=sejour_etranger,sejour_france,circuits&s_c.destination=MCPI.ES",
         nameOfPage: "SERP",
       },
-      // {
-      //   linkGoTo:
-      //     "https://voyages.carrefour.fr/sejour-etranger/djerba/hotel-vincci-safira-palms?pageType=product&s_pid=270110",
-      //   nameOfPage: "FICHE PRODUIT",
-      // },
-      // {
-      //   linkGoTo: "https://voyages.carrefour.fr/accueil/sejour-france",
-      //   nameOfPage: "LANDING FR",
-      // },
-      // {
-      //   linkGoTo: "https://voyages.carrefour.fr/accueil/derniere-minute/sejour",
-      //   nameOfPage: "LANDING DM",
-      // },
+      {
+        linkGoTo:
+          "https://voyages.carrefour.fr/sejour-etranger/djerba/hotel-vincci-safira-palms?pageType=product&s_pid=270110",
+        nameOfPage: "FICHE PRODUIT",
+      },
+      {
+        linkGoTo: "https://voyages.carrefour.fr/accueil/sejour-france",
+        nameOfPage: "LANDING FR",
+      },
+      {
+        linkGoTo: "https://voyages.carrefour.fr/accueil/derniere-minute/sejour",
+        nameOfPage: "LANDING DM",
+      },
     ],
   },
   // {
@@ -104,7 +104,7 @@ async function runLighthouse(url, isMobile) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  // Définir l'émulation mobile si isMobile est true
+  // Set mobile emulation if isMobile is true
   if (isMobile) {
     await page.setViewport({
       width: 375,
@@ -128,6 +128,42 @@ async function runLighthouse(url, isMobile) {
   return lighthouseResult.report;
 }
 
+function formatResults(results) {
+  const formattedResults = {};
+
+  results.forEach((result) => {
+    const { siteName, pageName, categories, date } = result;
+
+    if (!formattedResults[siteName]) {
+      formattedResults[siteName] = {};
+    }
+
+    if (!formattedResults[siteName][pageName]) {
+      formattedResults[siteName][pageName] = {
+        date,
+        mobile: {},
+        desktop: {},
+      };
+    }
+
+    formattedResults[siteName][pageName].mobile[date] = {
+      performance: categories.performance.mobile * 100,
+      accessibility: categories.accessibility.mobile * 100,
+      "best-practices": categories["best-practices"].mobile * 100,
+      seo: categories.seo.mobile * 100,
+    };
+
+    formattedResults[siteName][pageName].desktop[date] = {
+      performance: categories.performance.desktop * 100,
+      accessibility: categories.accessibility.desktop * 100,
+      "best-practices": categories["best-practices"].desktop * 100,
+      seo: categories.seo.desktop * 100,
+    };
+  });
+
+  return formattedResults;
+}
+
 async function createExcelFile(results) {
   const auditResultsFolder = "audit_results";
   const excelFilePath = path.join(
@@ -136,44 +172,40 @@ async function createExcelFile(results) {
   );
 
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Lighthouse Audit Results");
 
-  // Ajouter une ligne d'en-tête
-  worksheet.addRow([
-    "Site",
-    "URL",
-    "Page Name",
-    "Mobile Performance",
-    "Desktop Performance",
-    "Mobile Accessibility",
-    "Desktop Accessibility",
-    "Best Practices",
-    "SEO",
-  ]);
+  Object.entries(results).forEach(([siteName, siteData]) => {
+    const worksheet = workbook.addWorksheet(siteName);
 
-  // Ajouter les résultats pour chaque site et URL
-  results.forEach((result) => {
-    const { siteName, url, categories, pageName } = result;
+    worksheet.columns = [
+      { header: "Page", key: "page", width: 20 },
+      { header: "Date", key: "date", width: 12 },
+      { header: "Mob Perf", key: "mobPerf", width: 8 },
+      { header: "Desk Perf", key: "deskPerf", width: 8 },
+      { header: "Accessibility", key: "accessibility", width: 8 },
+      { header: "Best Practices", key: "bestPractices", width: 8 },
+      { header: "SEO", key: "seo", width: 8 },
+    ];
 
-    worksheet.addRow([
-      siteName,
-      url,
-      pageName, // Ajouter cette ligne pour le nom de la page
-      categories.performance.mobile * 100,
-      categories.performance.desktop * 100,
-      categories.accessibility.mobile * 100,
-      categories.accessibility.desktop * 100,
-      categories["best-practices"].mobile * 100,
-      categories.seo.mobile * 100,
-    ]);
+    Object.entries(siteData).forEach(([pageName, pageData]) => {
+      const dates = pageData.mobile ? Object.keys(pageData.mobile) : [];
+      dates.forEach((date) => {
+        worksheet.addRow({
+          page: pageName,
+          date,
+          mobPerf: pageData.mobile[date].performance || 0,
+          deskPerf: pageData.desktop[date].performance || 0,
+          accessibility: pageData.mobile[date].accessibility || 0,
+          bestPractices: pageData.mobile[date]["best-practices"] || 0,
+          seo: pageData.mobile[date].seo || 0,
+        });
+      });
+    });
   });
 
-  // Créer le dossier s'il n'existe pas
   if (!fs.existsSync(auditResultsFolder)) {
     fs.mkdirSync(auditResultsFolder);
   }
 
-  // Sauvegarder le fichier Excel
   await workbook.xlsx.writeFile(excelFilePath);
 
   console.log(`Excel file created: ${excelFilePath}`);
@@ -187,18 +219,25 @@ async function main() {
 
     for (const { linkGoTo, nameOfPage } of urls) {
       try {
-        // Audit pour la version mobile
+        const date = new Date().toLocaleDateString("fr-FR", {
+          year: "2-digit",
+          month: "2-digit",
+          day: "2-digit",
+        });
+
+        // Audit for the mobile version
         const mobileReport = await runLighthouse(linkGoTo, true);
         const mobileResult = JSON.parse(mobileReport);
 
-        // Audit pour la version desktop
+        // Audit for the desktop version
         const desktopReport = await runLighthouse(linkGoTo, false);
         const desktopResult = JSON.parse(desktopReport);
 
         auditResults.push({
           siteName,
           url: linkGoTo,
-          pageName: nameOfPage, // Ajout du nom de la page
+          pageName: nameOfPage,
+          date,
           categories: {
             performance: {
               mobile: mobileResult.categories.performance.score,
@@ -206,7 +245,6 @@ async function main() {
             },
             accessibility: {
               mobile: mobileResult.categories.accessibility.score,
-              desktop: desktopResult.categories.accessibility.score,
             },
             "best-practices": {
               mobile: mobileResult.categories["best-practices"].score,
@@ -228,8 +266,9 @@ async function main() {
     }
   }
 
-  // Créer le fichier Excel avec les résultats d'audit
-  await createExcelFile(auditResults);
+  const formattedResults = formatResults(auditResults);
+
+  await createExcelFile(formattedResults);
 }
 
 main();
