@@ -1,0 +1,28 @@
+name: Prettier
+
+on:
+  pull_request:
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js and dependencies
+        run: |
+          npm install
+
+      - name: Run Prettier
+        run: |
+          npm run prettier
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Run Prettier"
+          git push
