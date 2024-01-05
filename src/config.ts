@@ -9,11 +9,11 @@ export const siteToAudit = [
       {
         url: 'https://abderrahmanemouzoune.com',
         name: 'HP'
-      },
-      {
-        url: 'https://abderrahmanemouzoune.com/projects',
-        name: 'SERP'
       }
+      // {
+      //   url: 'https://abderrahmanemouzoune.com/projects',
+      //   name: 'SERP'
+      // }
     ]
   }
 ]

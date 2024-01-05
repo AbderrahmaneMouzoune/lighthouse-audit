@@ -4,7 +4,8 @@ export async function getResultForASite(site: WebSite): Promise<Result> {
   const getResultForAPage = async (
     page: Page
   ): Promise<PageAndResultAssociate> => {
-    const { mobile, desktop } = await runLighthouse(page.url)
+    const desktop = await runLighthouse(page.url)
+    const mobile = await runLighthouse(page.url, true)
 
     return {
       name: page.name,

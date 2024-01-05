@@ -1,8 +1,8 @@
-import { filenameToGenerate } from './config.js'
+import { existsSync, mkdirSync } from 'fs'
+import { filenameToGenerate, folderForGeneratedResults } from './config.js'
+import ExcelJS from 'exceljs'
 
 export function makeExcel(results: Result[]) {
-  const ExcelJS = require('exceljs')
-
   // Create a new workbook and add a worksheet
   const workbook = new ExcelJS.Workbook()
 
@@ -55,6 +55,10 @@ export function makeExcel(results: Result[]) {
     ]
 
     dataRows.forEach((row) => worksheet.addRow(row))
+  }
+
+  if (!existsSync(folderForGeneratedResults)) {
+    mkdirSync(folderForGeneratedResults)
   }
 
   // Save the workbook to a file
