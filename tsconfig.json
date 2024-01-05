@@ -1,15 +1,13 @@
 {
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
   "compilerOptions": {
-      "target": "es2017",
       "module": "ESNext",
+      "target": "ESNext",
       "moduleResolution": "node",
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "lib": ["ESNext", "DOM"],
       "outDir": "./build",
-      "strict": true,
-      "esModuleInterop": true
+      "strict": true
   },
   "include": ["src/**/*.ts", "src/*.ts"],
   "exclude": ["node_modules"]

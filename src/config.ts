@@ -1,7 +1,7 @@
-const path = require('path')
+import { join } from 'path'
 
 // Website to audit
-export const siteToAudit: WebSite[] = [
+export const siteToAudit = [
   {
     url: 'https://abderrahmanemouzoune.com',
     name: 'Abderrahmane Mouzoune | Portfolio',
@@ -20,10 +20,7 @@ export const siteToAudit: WebSite[] = [
 
 // Folder Config
 export const folderForGeneratedResults = 'audit_results'
-
-export const filenameToGenerate = path.join(
+export const filenameToGenerate = join(
   folderForGeneratedResults,
   'lighthouse_results.xlsx'
 )
-
-module.exports = { siteToAudit, folderForGeneratedResults, filenameToGenerate }

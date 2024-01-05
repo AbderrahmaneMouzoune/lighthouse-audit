@@ -1,4 +1,4 @@
-import { filenameToGenerate } from './config'
+import { filenameToGenerate } from './config.js'
 
 export function makeExcel(results: Result[]) {
   const ExcelJS = require('exceljs')
@@ -67,5 +67,3 @@ export function makeExcel(results: Result[]) {
       console.error('Error creating Excel file:', err)
     })
 }
-
-module.exports = { makeExcel }

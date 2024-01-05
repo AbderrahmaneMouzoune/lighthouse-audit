@@ -1,30 +1,25 @@
 import lighthouse, { RunnerResult } from 'lighthouse'
 import puppeteer, { Browser } from 'puppeteer'
 
-const getResultsFromLightHouse = async (browser: Browser, url: string) => {
-  return await lighthouse(url, {
-    port: Number(new URL(browser.wsEndpoint()).port),
-    output: 'json',
-    onlyCategories: ['performance']
-  })
-}
-
-async function runLighthouse(
+export async function runLighthouse(
   url: string
 ): Promise<{ mobile: RunnerResult; desktop: RunnerResult }> {
   const browser = await puppeteer.launch({
     headless: 'new',
     executablePath: puppeteer.executablePath(),
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    ignoreDefaultArgs: ['--enable-automation']
   })
   const page = await browser.newPage()
-
-  // Set mobile emulation if isMobile is true
 
   // Desktop
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
-  const lighthouseResultDesktop = await getResultsFromLightHouse(browser, url)
+  const lighthouseResultDesktop = await lighthouse(url, {
+    port: Number(new URL(browser.wsEndpoint()).port),
+    output: 'json',
+    onlyCategories: ['performance']
+  })
 
   if (!lighthouseResultDesktop)
     throw new Error("Couldn't get the results of lighthouse desktop")
@@ -40,7 +35,11 @@ async function runLighthouse(
 
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
-  const lighthouseResultMobile = await getResultsFromLightHouse(browser, url)
+  const lighthouseResultMobile = await lighthouse(url, {
+    port: Number(new URL(browser.wsEndpoint()).port),
+    output: 'json',
+    onlyCategories: ['performance']
+  })
 
   if (!lighthouseResultMobile)
     throw new Error("Couldn't get the results of lighthouse mobile")
@@ -49,7 +48,3 @@ async function runLighthouse(
 
   return { mobile: lighthouseResultMobile, desktop: lighthouseResultDesktop }
 }
-
-export default runLighthouse
-
-module.exports = { runLighthouse }

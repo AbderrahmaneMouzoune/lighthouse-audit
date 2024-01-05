@@ -1,4 +1,4 @@
-import runLighthouse from './lighthouse'
+import { runLighthouse } from './lighthouse.js'
 
 export async function getResultForASite(site: WebSite): Promise<Result> {
   const getResultForAPage = async (
@@ -29,5 +29,3 @@ export async function getResultForASite(site: WebSite): Promise<Result> {
     pagesAndResult
   }
 }
-
-module.exports = { getResultForASite }

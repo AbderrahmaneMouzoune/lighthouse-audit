@@ -6,12 +6,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node build/index.js",
-    "make:excel": "node build/makeExcel.js",
-    "lighthouse": "tsc && node build/lighthouse.js",
-    "dev": "nodemon src/index.ts",
-    "prettier": "npx prettier . --write",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --experimental-modules --es-module-specifier-resolution=node build/index.js",
+    "dev": "ts-node src/index.ts",
+    "prettier": "npx prettier . --write"
   },
   "author": "",
   "license": "ISC",
