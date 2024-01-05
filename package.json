@@ -2,10 +2,14 @@
   "name": "lighthouse-audit",
   "version": "1.0.0",
   "description": "",
+  "main": "src/index.ts",
   "type": "module",
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "build": "tsc",
+    "start": "tsc && node build/index.js",
+    "make:excel": "node build/makeExcel.js",
+    "lighthouse": "tsc && node build/lighthouse.js",
+    "dev": "nodemon src/index.ts",
     "prettier": "npx prettier . --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +19,11 @@
     "exceljs": "^4.4.0",
     "lighthouse": "^11.4.0",
     "puppeteer": "^21.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
