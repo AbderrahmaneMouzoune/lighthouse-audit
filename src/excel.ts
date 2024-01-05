@@ -41,20 +41,18 @@ export function makeExcel(results: Result[]) {
       scores.reduce((acc, curr) => acc + curr, 0) / scores.length
 
     // Add data rows
-    const dataRows = [
-      [
-        resultOfSite.date,
-        ...scores,
-        doTheAverageTotalScore(
-          resultOfSite.pagesAndResult.map((page) => page.result.mobile)
-        ),
-        doTheAverageTotalScore(
-          resultOfSite.pagesAndResult.map((page) => page.result.desktop)
-        )
-      ]
+    const scoresRow = [
+      resultOfSite.date,
+      ...scores,
+      doTheAverageTotalScore(
+        resultOfSite.pagesAndResult.map((page) => page.result.mobile)
+      ),
+      doTheAverageTotalScore(
+        resultOfSite.pagesAndResult.map((page) => page.result.desktop)
+      )
     ]
 
-    dataRows.forEach((row) => worksheet.addRow(row))
+    worksheet.addRow(scoresRow)
   }
 
   if (!existsSync(folderForGeneratedResults)) {
