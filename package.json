@@ -15,6 +15,7 @@
   "dependencies": {
     "exceljs": "^4.4.0",
     "lighthouse": "^11.4.0",
+    "p-limit": "^5.0.0",
     "puppeteer": "^21.6.1"
   },
   "devDependencies": {

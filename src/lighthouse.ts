@@ -5,7 +5,9 @@ export async function runLighthouse(
   url: string,
   isMobile?: boolean
 ): Promise<RunnerResult> {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    headless: 'new'
+  })
   const page = await browser.newPage()
 
   if (isMobile) {
@@ -21,7 +23,9 @@ export async function runLighthouse(
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   const lighthouseResult = await lighthouse(url, {
-    port: Number(new URL(browser.wsEndpoint()).port)
+    port: Number(new URL(browser.wsEndpoint()).port),
+    output: 'json',
+    onlyCategories: ['performance']
   })
 
   if (!lighthouseResult)
